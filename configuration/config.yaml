@@ -1,0 +1,24 @@
+model_and_encoder_name: dtc_model_and_encoder.sav
+dataset_name: irisdata_raw.csv
+iris_analysis_report_name: data_report.html
+
+column_names: [sepal length, sepal width, petal length, petal width, class]
+
+features: 
+  sepal length: {min: 4.3, max: 7.9}
+  sepal width: {min: 2, max: 4.4}
+  petal length: {min: 1, max: 6.9}
+  petal width: {min: 0.1, max: 2.5}
+  
+label_name: class
+
+decisiontree_settings:
+ criterion: entropy
+
+kfold_settings:
+ nr_splits: 5
+ shuffle: True
+ random_state: 123
+
+report_settings:
+  title: Iris Data Profile Report
