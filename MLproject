@@ -1,0 +1,21 @@
+name: "iris_classification/v1"
+
+conda_env: configuration/conda.yaml
+
+entry_points:
+  main:
+    command: python steps/main.py
+
+  ingest_data:
+    command: python steps/ingest.py 
+  
+  data_processing:
+    command: python steps/process.py
+
+  training:
+    parameters:
+      graphs: {type: bool, default: False}
+    command: python steps/train.py --graphs {graphs}
+
+  validate:
+    command: python steps/validate.py
