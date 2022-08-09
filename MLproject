@@ -10,7 +10,9 @@ entry_points:
     command: python steps/ingest.py 
   
   data_processing:
-    command: python steps/process.py
+    parameters:
+      dataframe_path: path
+    command: python steps/process.py --dataframe_path {dataframe_path}
 
   training:
     parameters:
