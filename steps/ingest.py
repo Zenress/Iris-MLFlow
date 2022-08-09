@@ -5,31 +5,38 @@ TODO: Docstring for functions
 TODO: Function that takes and reads the data, then outputs it as a dataframe
 TODO: Returns: Dataframe (pickled)
 """
-from pathlib import Path
+import pandas as pd
+import mlflow
+import yaml
+import logging
 
+CONFIG_PATH = "configuration/config.yaml"
 
-def load_file_as_dataframe(
-    dataset_name: str,
-    column_names: list,
-    ):
-    """
-    Read data from dataset and encode the label column
+def load_file_as_dataframe() -> None:
+    with mlflow.start_run() as mlrun:
+        """
+        Read data from dataset
 
-    Reads the data from the dataset and assigns the header with column_names.
-    Then it encodes the categorical label column into a numerical label column.
+        Reads the data from the dataset and assigns the header with column_names.
+        Then it encodes the categorical label column into a numerical label column.
+        """
+        with open(CONFIG_PATH, "r", encoding="UTF-8") as ymlfile:
+            cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+        
+        logger = logging.getLogger(__name__)
+        
+        csv_url = (
+            "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
+        )
+        try:
+            dataframe = pd.read_csv()
+        except Exception as e:
+            logger.exception(
+                "Unable to download training & test CSV, check your internet connection. Error: %s", e
+            )
+        
+        print("Uploading dataframe: %s" % dataframe)
+        mlflow.log_artifact(dataframe, "artifacts/")
 
-    Args:
-        label_name (str): name of the label column
-        dataset_name (str): name of the dataset to read from
-        column_names (list): names of all the columns
-
-    Returns:
-        pandas.DataFrane: holds all the feature column records for each feature column
-        pandas.Series: holds the label column records
-    """
-    dataset_full_path = Path(DATASET_PATH, dataset_name)
-
-    # Assigning custom column headers while reading the csv file
-    dataset_df = pd.read_csv(dataset_full_path, header=None, names=column_names)
-
-    return dataset_df
+if __name__ == '__main__':
+    load_file_as_dataframe()
