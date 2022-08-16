@@ -1,6 +1,6 @@
 name: "iris_classification/v1"
 
-conda_env: configuration/conda.yaml
+conda_env: configuration/conda_env.yaml
 
 entry_points:
   main:
