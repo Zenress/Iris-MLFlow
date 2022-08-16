@@ -7,10 +7,10 @@ dependencies:
  - python=3.9.12
  - pandas=1.4.2
  - markupsafe=2.0.0
- - scikit-learn=1.0.
+ - scikit-learn=1.0.2
+ - pip
  - pip:
     - mlflow
-    - mlflow[pipelines]
     - pandas-profiling==3.2.0
     - matplotlib==3.5.2
     - numpy==1.23
