@@ -11,16 +11,16 @@ import yaml
 import logging
 import requests
 import os
+from pathlib import Path
 
 CONFIG_PATH = "configuration/config.yaml"
+DATASET_PATH = "data/"
 
 def load_file_as_dataframe() -> None:
     with mlflow.start_run() as mlrun:
         """
-        Read data from dataset
+        Download or read a dataset
 
-        Reads the data from the dataset and assigns the header with column_names.
-        Then it encodes the categorical label column into a numerical label column.
         """
         with open(CONFIG_PATH, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
@@ -30,12 +30,16 @@ def load_file_as_dataframe() -> None:
         csv_url = (
             "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
         )
-        if not os.path.exists("irisdata.csv"):
+        file_name = Path(DATASET_PATH, cfg["dataset_name"])
+        
+        if not file_name.exists():
+            print("File doesn't exist")
             dataset = requests.get(csv_url, allow_redirects=True)
-            open("irisdata.csv","wb").write(dataset.content)
+            open("irisdata_raw.csv","wb").write(dataset.content)
         else:
             print("File already exists")
-            
+            print("Using existing file")
+            dataset = requests.get(file_name)
         
         print("Uploading dataframe: %s" % dataset.content)
         mlflow.log_artifact(dataset.content, "artifacts/")
