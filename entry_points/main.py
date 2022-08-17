@@ -13,7 +13,9 @@ def workflow():
         
         #Current parameters: dataframe
         print('Launching data processing')
-        process_run = mlflow.run("steps/","data_processing", parameters={"data_path": data_path})
+        process_run = mlflow.run("steps/","data_processing", parameters={"data_path": dataset_path})
+        process_run = mlflow.tracking.MlflowClient().get_run(process_run.run_id)
+        
         
 if __name__ == "__main__":
     workflow()
