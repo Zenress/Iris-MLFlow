@@ -4,20 +4,26 @@ conda_env: configuration/conda_env.yaml
 
 entry_points:
   main:
-    command: python steps/main.py
+    parameters:
+      graphs: {type: bool, default: False}
+    command: python steps/main.py --graphs {graphs}
 
   ingest_data:
     command: python steps/ingest.py 
   
   data_processing:
     parameters:
-      dataframe_path: path
-    command: python steps/process.py --dataframe_path {dataframe_path}
+      dataset_path: path
+    command: python steps/process.py --dataset_path {dataset_path}
 
   training:
     parameters:
+      train_data_path: train_path
+      test_data_path: test_path
       graphs: {type: bool, default: False}
-    command: python steps/train.py --graphs {graphs}
+    command: python steps/train.py --graphs {graphs} --train_data_path {train_path} -test_data_path {test_path}
 
   validate:
+    parameters:
+      validate_data_path: validate_path
     command: python steps/validate.py
