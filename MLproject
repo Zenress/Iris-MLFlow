@@ -1,6 +1,6 @@
 name: "iris_classification/v1"
 
-conda_env: configuration/conda_env.yaml
+conda_env: configuration/env.yaml
 
 entry_points:
   main:
@@ -8,22 +8,23 @@ entry_points:
       graphs: {type: bool, default: False}
     command: python steps/main.py --graphs {graphs}
 
-  ingest_data:
+  ingest:
     command: python steps/ingest.py 
   
-  data_processing:
+  process:
     parameters:
-      dataset_path: path
+      dataset_path: {type: str}
     command: python steps/process.py --dataset_path {dataset_path}
 
-  training:
+  train:
     parameters:
-      train_data_path: train_path
-      test_data_path: test_path
+      process_run_id: {type: str}
       graphs: {type: bool, default: False}
-    command: python steps/train.py --graphs {graphs} --train_data_path {train_path} -test_data_path {test_path}
+    command: python steps/train.py --graphs {graphs} --process_run_id {process_run_id}
+
 
   validate:
     parameters:
-      validate_data_path: validate_path
-    command: python steps/validate.py
+      X_validate_path: artifacts/X_validate_path
+      y_validate_path: artifacts/y_validate_path
+    command: python steps/validate.py --validatepathX {X_validate_path} --validatepathy {y_validate_path}
