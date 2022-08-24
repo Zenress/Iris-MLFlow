@@ -12,7 +12,7 @@ import click
 import pandas as pd
 import yaml
 
-CONFIG_PATH = "configuration/config.yaml"
+CONFIG_PATH = "../configuration/config.yaml"
 
 def label_encoding_method(
     dataset_df: pd.DataFrame,
@@ -59,7 +59,7 @@ def shuffle_method(
     shuffled_df.reset_index(drop=True,inplace=True)
     return shuffled_df
     
-
+@click.command()
 @click.option("--dataset_path")
 def task(dataset_path):
     with mlflow.start_run() as mlrun:
@@ -67,7 +67,7 @@ def task(dataset_path):
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
             
         dataset_df = pd.read_csv(
-            filepath_or_buffer=dataset_path,
+            filepath_or_buffer=dataset_path.replace("file:///","")[1:-1],
             sep=","
             )
         
