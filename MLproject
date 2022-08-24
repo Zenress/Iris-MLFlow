@@ -13,7 +13,7 @@ entry_points:
   
   process:
     parameters:
-      dataset_path: {type: str}
+      dataset_path: path
     command: python steps/process.py --dataset_path {dataset_path}
 
   train:
