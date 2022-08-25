@@ -11,6 +11,8 @@ def workflow():
         ingest_run = mlflow.tracking.MlflowClient().get_run(ingest_run.run_id)
         dataset_path = os.path.join(ingest_run.info.artifact_uri, "irisdata_raw.csv")
         
+        print(f"\n \n {dataset_path}")
+        
         #Current parameters: dataframe
         print('Launching Data Processing step')
         process_run = mlflow.run("steps/","process.py", parameters={"dataset_path": dataset_path}, env_manager="local")
