@@ -13,7 +13,7 @@ entry_points:
   
   process:
     parameters:
-      dataset_path: path
+      dataset_path: {type: str}
     command: python steps/process.py --dataset_path {dataset_path}
 
   train:
@@ -21,7 +21,6 @@ entry_points:
       process_run_id: {type: str}
       graphs: {type: bool, default: False}
     command: python steps/train.py --graphs {graphs} --process_run_id {process_run_id}
-
 
   validate:
     parameters:
