@@ -33,7 +33,6 @@ def load_file_as_dataframe() -> None:
             print("Using existing file")
 
         dataset = open(file_name, "rb")
-        artifact_path = Path("../artifacts/")
         mlflow.log_artifact(file_name)
 
         print("Uploading dataframe: %s" % dataset)
