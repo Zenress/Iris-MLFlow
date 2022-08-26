@@ -12,40 +12,13 @@ from sklearn import metrics
 
 CONFIG_PATH = "configuration/config.yaml"
 
-def split_dataset(
-    dataset_df: pd.DataFrame,
-    label_name: str,
-    feature_keys: str
-    ):
-    """
-    Split dataset into training, validation and testing set
-    """
-    X = dataset_df[feature_keys]
-    y = dataset_df[label_name]
-    
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=0.2,
-        random_state=1
-        )
-    
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_train,
-        y_train,
-        test_size=0.25,
-        random_state=1
-        )
-    
-    return X_train, y_train, X_test, y_test, X_val, y_val
 
 def train_model(
     dtc_model: DecisionTreeClassifier,
-    train_index: int,
-    test_index: int,
-    X: pd.DataFrame,
-    y: pd.Series,
-    fold_nr: int
+    train_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+    feature_keys,
+    label_name: str
     ) -> None:
     """
     Train DecisionTreeClassifier Model using Iris Dataset.
@@ -62,10 +35,10 @@ def train_model(
         X (pandas.DataFrame) The Feature columns of the dataset
         y (pandas.Series) The Label column of the dataset
     """
-    X_train = X.iloc[train_index].values
-    X_test = X.iloc[test_index].values
-    y_train = y.iloc[train_index].values
-    y_test = y.iloc[test_index].values
+    X_train = train_df[feature_keys]
+    X_test = test_df[feature_keys]
+    y_train = train_df[label_name]
+    y_test = 
 
     dtc_model = dtc_model.fit(X_train, y_train)
     print(
@@ -82,16 +55,24 @@ def train(process_run_id):
         with open(CONFIG_PATH, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
             
-        process_run = mlflow.tracking.MlflowClient().get_run(process_run_id.run_id)
-        dataset_path = os.path.join(process_run.info.artifact_uri, "process_dataset")
-        dataset_df = pd.read_csv(dataset_path)
+        process_run = mlflow.tracking.MlflowClient().get_run(process_run_id)
+        train_path = os.path.join(process_run.info.artifact_uri, "train_data.csv")
+        train_df = pd.read_csv(train_path)
         
-        #TODO: Log validation sets as artifacts
-        X_train, y_train, X_test, y_test, X_val, y_val = split_dataset(
-            dataset_df=dataset_df,
-            label_name=cfg["label_name"],
+        test_path = os.path.join(process_run.info.artifact_uri, "test_data.csv")
+        test_df = pd.read_csv(test_path)
+        
+        dtc_model = DecisionTreeClassifier(
+            criterion=cfg["decisiontree_settings"]["criterion"]
+        )
+        
+        train_model(
+            dtc_model=dtc_model,
+            train_df=train_df,
+            test_df=test_df,
             feature_keys=cfg["features"].keys()
             )
+        
 
 if __name__ == "__main__":
     train()
