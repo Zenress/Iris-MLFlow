@@ -19,8 +19,7 @@ entry_points:
   train:
     parameters:
       process_run_id: {type: str}
-      graphs: {type: bool, default: False}
-    command: python steps/train.py --graphs {graphs} --process_run_id {process_run_id}
+    command: python steps/train.py --process_run_id {process_run_id}
 
   validate:
     parameters:
