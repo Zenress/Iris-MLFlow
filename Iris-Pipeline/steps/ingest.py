@@ -6,16 +6,18 @@ import yaml
 import requests
 from pathlib import Path
 
-CONFIG_PATH = "../configuration/config.yaml"
-DATASET_PATH = "../data/"
+CONFIG_PATH = "..//configuration//config.yaml"
+DATASET_PATH = "..//data//"
 
 
 def load_file_as_dataframe() -> None:
-    with mlflow.start_run() as mlrun:
-        """
-        Download or read a dataset
+    """
+    Download the dataset or use existing one
 
-        """
+    Downloads the dataset if it doesn't already exists,
+     otherwise it just passes the currently existing dataset
+    """
+    with mlflow.start_run() as mlrun:
         with open(CONFIG_PATH, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
@@ -31,8 +33,7 @@ def load_file_as_dataframe() -> None:
         else:
             print("File already exists")
             print("Using existing file")
-
-        dataset = open(file_name, "rb")
+            
         mlflow.log_artifact(file_name)
 
         print("Uploading dataframe: %s" % dataset)
