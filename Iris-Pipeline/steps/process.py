@@ -34,7 +34,7 @@ def label_encoding_method(
             with an encoded label column
     """
     label_encoder = LabelEncoder
-    dataset_df[label_name] = label_encoder.fit_transform(dataset_df[label_name])
+    dataset_df[label_name] = label_encoder.fit_transform(label_encoder,dataset_df[label_name])
     return dataset_df
 
 
@@ -104,6 +104,21 @@ def split_stratified_into_train_val_test(
 @click.command()
 @click.option("--dataset_run_id")
 def task(dataset_run_id):
+    """Function that runs the process step
+
+    Starts by loading the configuration file
+    Then it loads the dataset using the dataset_run_id
+    
+    Function that runs the process step by using the following functions:
+        label_encoding_method(): Returns encoded pandas dataframe
+        split_stratified_into_train_val_test(): Returns 3 dataframes with the dataset_df,
+            split into those 3 dataframes
+    
+    Afterwards the to_csv() function writes the dataframes into files
+    
+    Args:
+        dataset_run_id (str): ID gotten from the last step's run
+    """
     with mlflow.start_run() as mlrun:
         with open(CONFIG_PATH, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
@@ -113,7 +128,9 @@ def task(dataset_run_id):
         
         dataset_df = pd.read_csv(
             filepath_or_buffer=dataset_path,
-            sep=","
+            sep=",",
+            header=None,
+            names=cfg["column_names"]
             )
         
         encoded_df = label_encoding_method(
