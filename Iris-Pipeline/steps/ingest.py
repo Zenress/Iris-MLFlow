@@ -36,7 +36,7 @@ def load_file_as_dataframe() -> None:
             
         mlflow.log_artifact(file_name)
 
-        print("Uploading dataframe: %s" % dataset)
+        print("Uploading dataframe: %s" % file_name)
 
 
 if __name__ == "__main__":
