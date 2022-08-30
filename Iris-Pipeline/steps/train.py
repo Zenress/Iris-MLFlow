@@ -13,17 +13,21 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
 from sklearn import metrics
+from sklearn import tree
 import matplotlib.pyplot as plt
 
-CONFIG_PATH = "configuration/config.yaml"
-MODEL_PATH = "models/"
+CONFIG_PATH = "../configuration/config.yaml"
+MODEL_PATH = "../models/"
 
 def parameter_tuning(
     nr_kfold: int,
     X_train: pd.Series,
     y_train: pd.Series
     ) -> Tuple[int, str, str]:
-    """_summary_
+    """Tune parameters for use in DecisionTreeClassifier model
+    
+    Tries to find the best parameters to run the DecisionTreeClassifier,
+        using GridSearchCV
 
     Args:
         nr_kfold (int): number of kfolds
@@ -38,7 +42,7 @@ def parameter_tuning(
     """
     parameters = {'criterion': ['gini','entropy'], 'splitter': ['best','random'], 'max_depth': [2,3,4]}
     
-    tree= DecisionTreeClassifier()
+    tree = DecisionTreeClassifier()
     grid = GridSearchCV(tree, parameters, cv=nr_kfold)
     grid.fit(X_train, y_train)
     
@@ -105,8 +109,8 @@ def k_fold_cross_validation(
         cv=nr_kfold
         )
       
-    mlflow.log_metric(f"average_accuracy", kfold_scores.mean())
-    mlflow.log_metric(f"std_accuracy", kfold_scores.std())
+    mlflow.log_metric("average_accuracy", kfold_scores.mean())
+    mlflow.log_metric("std_accuracy", kfold_scores.std())
 
 
 def train_model(
@@ -129,6 +133,7 @@ def train_model(
         y_train (pd.Series): Label column for training against
         y_test (pd.Series): Label column for testing against
     """
+    #TODO: Create condition that retrains the model if it already exists in the models folder
     dtc_model = dtc_model.fit(X_train, y_train)
     print(
         (
@@ -138,6 +143,8 @@ def train_model(
             f"Double check: {dtc_model.score(X_test,y_test)}"
         )
     )
+    mlflow.log_metric("test_accuracy",metrics.accuracy_score(y_test, dtc_model.predict(X_test)))
+    mlflow.log_metric("test_score",dtc_model.score(X_test,y_test))
 
 
 def save_model(
@@ -158,9 +165,10 @@ def save_model(
     
     # Creates the tree topology
     fig, axes = plt.subplots(nrows = 1,ncols = 1,figsize = (4,4), dpi=300)
-    dtc_model.plot_tree(dtc_model)
+    tree.plot_tree(dtc_model)
     # Save the tree
-    fig.savefig(model_path)
+    #TODO: make the path a constant
+    fig.savefig("../data/model_tree_fig.png")
     
     # Track the optimum model
     mlflow.sklearn.save_model(
@@ -171,9 +179,9 @@ def save_model(
     # Track the decision tree image
     mlflow.log_artifact(model_path)
 
-
-click.option("--process_run_id")
-def train(process_run_id):
+@click.command()
+@click.option("--process_run_id")
+def task(process_run_id):
     """
     Train function that orchestrates the training step
 
@@ -208,7 +216,11 @@ def train(process_run_id):
         y_train = train_df[cfg["label_name"]]
         y_test = test_df[cfg["label_name"]]
         
-        max_depth, criterion, splitter = parameter_tuning(cfg["kfold_nr_splits"])
+        max_depth, criterion, splitter = parameter_tuning(
+            nr_kfold=cfg["kfold_nr_splits"],
+            X_train=X_train,
+            y_train=y_train
+            )
         
         dtc_model = model_creation(
             criterion=criterion,
@@ -238,4 +250,4 @@ def train(process_run_id):
         
 
 if __name__ == "__main__":
-    train()
+    task()
