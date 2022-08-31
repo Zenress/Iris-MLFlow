@@ -1,6 +1,7 @@
 model_name: dtc_model.sav
 dataset_name: irisdata_raw.csv
 iris_analysis_report_name: data_report.html
+csv_url: https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data
 
 column_names: [sepal length, sepal width, petal length, petal width, class]
 
