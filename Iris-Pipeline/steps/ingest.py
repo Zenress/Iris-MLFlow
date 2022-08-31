@@ -6,8 +6,8 @@ import yaml
 import requests
 from pathlib import Path
 
-CONFIG_PATH = "..//configuration//config.yaml"
-DATASET_PATH = "..//data//"
+CONFIG_PATH = "../configuration/config.yaml"
+DATASET_PATH = "../data/"
 
 
 def load_file_as_dataframe() -> None:
@@ -25,7 +25,7 @@ def load_file_as_dataframe() -> None:
             "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
         )
         file_name = Path(DATASET_PATH, cfg["dataset_name"])
-
+        
         if not file_name.exists():
             print("File doesn't exist")
             dataset = requests.get(url=csv_url, allow_redirects=True)
@@ -33,7 +33,7 @@ def load_file_as_dataframe() -> None:
         else:
             print("File already exists")
             print("Using existing file")
-            
+
         mlflow.log_artifact(file_name)
 
         print("Uploading dataframe: %s" % file_name)

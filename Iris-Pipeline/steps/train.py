@@ -118,7 +118,8 @@ def train_model(
     X_train: pd.Series,
     X_test: pd.Series,
     y_train: pd.Series,
-    y_test: pd.Series
+    y_test: pd.Series,
+    model_path: Path,
     ) -> None:
     """
     Train DecisionTreeClassifier Model using 2 split dataframes
@@ -133,6 +134,9 @@ def train_model(
         y_train (pd.Series): Label column for training against
         y_test (pd.Series): Label column for testing against
     """
+    if model_path.exists():
+        dtc_model = mlflow.sklearn.load_model(model_path)
+    
     #TODO: Create condition that retrains the model if it already exists in the models folder
     dtc_model = dtc_model.fit(X_train, y_train)
     print(
@@ -149,7 +153,7 @@ def train_model(
 
 def save_model(
     dtc_model: DecisionTreeClassifier,
-    model_name: str
+    model_path: str
     ) -> None:
     """
     Save model using sklearn under MLFlow
@@ -161,8 +165,6 @@ def save_model(
         model_name (str): string with the model_name gathered from
             configuration file
     """
-    model_path = Path(MODEL_PATH, model_name)
-    
     # Creates the tree topology
     fig, axes = plt.subplots(nrows = 1,ncols = 1,figsize = (4,4), dpi=300)
     tree.plot_tree(dtc_model)
@@ -176,8 +178,10 @@ def save_model(
         path=model_path,
         serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_PICKLE
         )
+
+    #TODO: Log_model
     # Track the decision tree image
-    mlflow.log_artifact(model_path)
+    mlflow.log_artifact("../data/model_tree_fig.png")
 
 @click.command()
 @click.option("--process_run_id")
@@ -202,7 +206,8 @@ def task(process_run_id):
     with mlflow.start_run() as mlrun:
         with open(CONFIG_PATH, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-            
+        
+        model_path = Path(MODEL_PATH, cfg["model_name"])    
         process_run = mlflow.tracking.MlflowClient().get_run(process_run_id)
         
         train_path = os.path.join(process_run.info.artifact_uri, "train_data.csv")
@@ -241,11 +246,12 @@ def task(process_run_id):
             X_test=X_test,
             y_train=y_train,
             y_test=y_test,
+            model_path=model_path
             )
         
         save_model(
             dtc_model=dtc_model,
-            model_name=cfg["model_name"],
+            model_path=model_path,
             )
         
 
