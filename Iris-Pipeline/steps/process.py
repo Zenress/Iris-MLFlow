@@ -35,6 +35,7 @@ def label_encoding_method(
     """
     label_encoder = LabelEncoder
     dataset_df[label_name] = label_encoder.fit_transform(label_encoder,dataset_df[label_name])
+    
     return dataset_df
 
 
@@ -71,7 +72,6 @@ def split_stratified_into_train_val_test(
         df_train, df_val, df_test (pd.DataFrame):
             Dataframes containing the three splits.
     '''
-
     if frac_train + frac_val + frac_test != 1.0:
         raise ValueError('fractions %f, %f, %f do not add up to 1.0' % \
                          (frac_train, frac_val, frac_test))
@@ -97,6 +97,8 @@ def split_stratified_into_train_val_test(
                                                       test_size=relative_frac_test,
                                                       random_state=random_state)
 
+    #Makes sure the dataframes didn't lose or drop any records,
+    # during the above transformations
     assert len(df_input) == len(df_train) + len(df_val) + len(df_test)
 
     return df_train, df_val, df_test
@@ -147,17 +149,17 @@ def task(dataset_run_id):
             random_state=None
             )
         
-        print("Uploading train dataset: %s" % train_df)
+        print("Uploading train dataset: %s" % train_df.head(2))
         train_path = Path(DATASET_PATH, "train_data.csv")
         train_df.to_csv(train_path, index=False)
         mlflow.log_artifact(train_path)
         
-        print("Uploading train dataset: %s" % test_df)
+        print("Uploading train dataset: %s" % test_df.head(2))
         test_path =  Path(DATASET_PATH, "test_data.csv")
         test_df.to_csv(test_path, index=False)
         mlflow.log_artifact(test_path)
         
-        print("Uploading train dataset: %s" % validate_df)
+        print("Uploading train dataset: %s" % validate_df.head(2))
         validate_path = Path(DATASET_PATH, "validate_data.csv")
         validate_df.to_csv(validate_path, index=False)
         mlflow.log_artifact(validate_path)
