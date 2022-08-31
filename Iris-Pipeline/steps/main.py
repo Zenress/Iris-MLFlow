@@ -8,7 +8,6 @@ def workflow():
         print('Launching Ingest Step')
         ingest_run = mlflow.run("steps/","ingest.py", env_manager="local")
         
-        #Current parameters: dataframe
         print('Launching Data Processing step')
         process_run = mlflow.run("steps/","process.py", parameters={"dataset_run_id": ingest_run.run_id}, env_manager="local")
         
