@@ -1,5 +1,7 @@
 """
-What's needed in this file is:
+Ingest step used to either Download or use the existing dataset.
+The name of the dataset is gathered from the config.yaml which dictates the name
+The url used for Downloading the dataset is also gathered from config.yaml
 """
 import mlflow
 import yaml
@@ -8,7 +10,6 @@ from pathlib import Path
 
 CONFIG_PATH = "../configuration/config.yaml"
 DATASET_PATH = "../data/"
-
 
 def load_file_as_dataframe() -> None:
     """
@@ -21,9 +22,8 @@ def load_file_as_dataframe() -> None:
         with open(CONFIG_PATH, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-        csv_url = (
-            "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
-        )
+        csv_url = cfg["csv_url"]
+
         file_name = Path(DATASET_PATH, cfg["dataset_name"])
         
         if not file_name.exists():
