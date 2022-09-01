@@ -178,7 +178,7 @@ def plot_and_log_model(
 
     mlflow.sklearn.log_model(
         sk_model=dtc_model,
-        artifact_path="artifacts",
+        artifact_path="models",
         serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_PICKLE,
     )
 
