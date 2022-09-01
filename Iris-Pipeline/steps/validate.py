@@ -6,9 +6,41 @@ import mlflow
 import click
 import yaml
 import pandas as pd
-import os
+from sklearn import metrics
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import cross_val_score
 
 CONFIG_PATH = "../configuration/config.yaml"
+
+def evaluate(
+    model:DecisionTreeClassifier,
+    X_validate: pd.Series,
+    y_validate: pd.Series
+    ) -> None:
+    """_summary_
+
+    Args:
+        model (DecisionTreeClassifier): _description_
+        X_validate (pd.Series): _description_
+        y_validate (pd.Series): _description_
+    """
+    mlflow.log_metric(
+        "test_accuracy", metrics.accuracy_score(y_validate, model.predict(X_validate))
+    )
+    mlflow.log_metric(
+        "test_score", model.score(X_validate, y_validate)
+    )
+    
+    scores = cross_val_score(
+        estimator=model,
+        X=X_validate,
+        y=y_validate,
+        )
+    
+    mlflow.log_metric(
+        "val_score", scores
+    )
+
 
 @click.command()
 @click.option("--process_run_id")
