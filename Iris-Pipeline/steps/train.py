@@ -43,7 +43,7 @@ def parameter_tuning(
     parameters = {
         "criterion": ["gini", "entropy"],
         "splitter": ["best", "random"],
-        "max_depth": [2, 3, 4, 5, 6],
+        "max_depth": [2, 3, 4, 5, 6, 7, 8, 9, 10],
     }
 
     tree = DecisionTreeClassifier()
@@ -187,9 +187,9 @@ def plot_and_log_model(
 @click.option("--process_run_id")
 def task(process_run_id) -> None:
     """
-    Train function that orchestrates the training step
+    Task function that orchestrates the training step
 
-    Train function organises the training step.
+    Task function organises the training step.
     Following functions and their order of execution:
         Parameter_tuning(): Checks for the best possible parameters,
             to use on the DecisionTreeClassifier
