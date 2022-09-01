@@ -12,6 +12,7 @@ from sklearn.model_selection import cross_val_score
 
 CONFIG_PATH = "../configuration/config.yaml"
 
+
 def evaluate(
     model:DecisionTreeClassifier,
     X_validate: pd.Series,
@@ -42,25 +43,31 @@ def evaluate(
     )
 
 
+
 @click.command()
 @click.option("--process_run_id")
-def task(process_run_id):
+@click.option("--train_run_id")
+def task(process_run_id, train_run_id):
     """_summary_
 
     Args:
         process_run_id (_type_): _description_
+        train_run_id (_type_): _description_
     """
     with mlflow.start_run() as mlrun:
         with open(CONFIG_PATH, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
             
         process_run = mlflow.tracking.MlflowClient().get_run(process_run_id)
+        train_run = mlflow.tracking.MLflowclient().get_run(train_run_id)
         
         validate_path = os.path.join(process_run.info.artifact_uri, "validate_data.csv")
         validate_df = pd.read_csv(validate_path)
         
         X_validate = validate_df[cfg["features"].keys()]
         y_validate = validate_df[cfg["label_name"]]
+        
+        
         
 if __name__ == "__main__":
     task()
