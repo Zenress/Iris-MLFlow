@@ -24,4 +24,5 @@ entry_points:
   validate:
     parameters:
       process_run_id: {type: str}
-    command: python steps/validate.py --process_run_id {process_run_id}
+      train_run_id: {type: str}
+    command: python steps/validate.py --process_run_id {process_run_id} --train_run_id {train_run_id}
