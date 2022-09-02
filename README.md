@@ -43,12 +43,12 @@ The project is run locally and will therefore use storage on your computer
 
 To run this project you should create a **Conda Environment** (<https://www.anaconda.com/products/distribution>) to run it on. This will help with making sure it can run in it's default configuration
 
-The **Conda Environment** file `configuration/env.yaml` makes it easy to create the environment to run this project.
+The **Conda Environment** file `Iris-Pipeline/configuration/env.yaml` makes it easy to create the environment to run this project.
 
 To create the environment, you should type the command in console:
 
 ```console
-conda env create -f configuration/env.yaml
+conda env create -f Iris-Pipeline/configuration/env.yaml
 ```
 
 After having created the environment you also have to activate it:
