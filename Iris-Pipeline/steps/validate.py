@@ -1,7 +1,7 @@
 """
 Code for validating model performance using validation set that's derived from dataset
 """
-import os
+from pathlib import Path
 import mlflow
 import click
 import yaml
@@ -9,8 +9,6 @@ import pandas as pd
 from sklearn import metrics
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import cross_val_score
-
-CONFIG_PATH = "../configuration/config.yaml"
 
 
 def evaluate(
@@ -43,30 +41,29 @@ def evaluate(
     )
 
 
-
 @click.command()
 @click.option("--process_run_id")
 @click.option("--train_run_id")
-def task(process_run_id, train_run_id):
+@click.option("--config_path")
+def task(process_run_id, train_run_id, config_path):
     """_summary_
 
     Args:
-        process_run_id (_type_): _description_
-        train_run_id (_type_): _description_
+        process_run_id (str): run id that the process step generated
+        train_run_id (str): run id that the train step generated
     """
     with mlflow.start_run() as mlrun:
-        with open(CONFIG_PATH, "r", encoding="UTF-8") as ymlfile:
+        with open(config_path, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
             
         process_run = mlflow.tracking.MlflowClient().get_run(process_run_id)
-        train_run = mlflow.tracking.MLflowclient().get_run(train_run_id)
+        train_run = mlflow.tracking.MlflowClient().get_run(train_run_id)
         
-        validate_path = os.path.join(process_run.info.artifact_uri, "validate_data.csv")
+        validate_path = Path(process_run.info.artifact_uri, "validate_data.csv")
         validate_df = pd.read_csv(validate_path)
         
         X_validate = validate_df[cfg["features"].keys()]
         y_validate = validate_df[cfg["label_name"]]
-        
         
         
 if __name__ == "__main__":
