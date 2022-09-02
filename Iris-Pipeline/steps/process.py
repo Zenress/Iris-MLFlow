@@ -8,10 +8,6 @@ import mlflow
 import click
 import pandas as pd
 import yaml
-import os
-
-CONFIG_PATH = "../configuration/config.yaml"
-DATASET_PATH = "../data/"
 
 def label_encoding_method(
     dataset_df: pd.DataFrame,
@@ -105,7 +101,8 @@ def split_stratified_into_train_val_test(
 
 @click.command()
 @click.option("--dataset_run_id")
-def task(dataset_run_id):
+@click.option("--config_path")
+def task(dataset_run_id, config_path):
     """Function that runs the process step
 
     Starts by loading the configuration file
@@ -122,11 +119,11 @@ def task(dataset_run_id):
         dataset_run_id (str): ID gotten from the last step's run
     """
     with mlflow.start_run() as mlrun:
-        with open(CONFIG_PATH, "r", encoding="UTF-8") as ymlfile:
+        with open(config_path, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
         
         dataset_run = mlflow.tracking.MlflowClient().get_run(dataset_run_id)   
-        dataset_path = os.path.join(dataset_run.info.artifact_uri, "irisdata_raw.csv")
+        dataset_path = Path(dataset_run.info.artifact_uri, "irisdata_raw.csv")
         
         dataset_df = pd.read_csv(
             filepath_or_buffer=dataset_path,
@@ -150,17 +147,17 @@ def task(dataset_run_id):
             )
         
         print("Uploading train dataset: %s" % train_df.head(2))
-        train_path = Path(DATASET_PATH, "train_data.csv")
+        train_path = Path(cfg["dataset_path"], "train_data.csv")
         train_df.to_csv(train_path, index=False)
         mlflow.log_artifact(train_path)
         
         print("Uploading train dataset: %s" % test_df.head(2))
-        test_path =  Path(DATASET_PATH, "test_data.csv")
+        test_path =  Path(cfg["dataset_path"], "test_data.csv")
         test_df.to_csv(test_path, index=False)
         mlflow.log_artifact(test_path)
         
         print("Uploading train dataset: %s" % validate_df.head(2))
-        validate_path = Path(DATASET_PATH, "validate_data.csv")
+        validate_path = Path(cfg["dataset_path"], "validate_data.csv")
         validate_df.to_csv(validate_path, index=False)
         mlflow.log_artifact(validate_path)
 
