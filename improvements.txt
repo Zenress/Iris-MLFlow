@@ -1,5 +1,8 @@
+TODO:
 - Reread README.md
+- Complete Validate docstring
 
+Figure out:
 - Make a fake model registry 
 - How to figure out if the new model is better (how to compare correctly)?
 
