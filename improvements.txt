@@ -1,0 +1,15 @@
+- Reread README.md
+
+- Make a fake model registry 
+- How to figure out if the new model is better (how to compare correctly)?
+
+Projects currently going on:
+- Iris MLFLOW Pipeline
+- Tutorial on how to setup MLFlow projects on Windows PC
+- 1 Article
+- Terms vocab
+
+Exercises needed for next time:
+- Why would you need 2 Conda Environments?
+- How do i plan to deal with the Article?
+- How much time would things take?
