@@ -2,7 +2,7 @@
 Training step used for training the model using the data,
     that was prepared from the last step
 """
-import os
+from pathlib import Path
 from typing import Tuple
 import click
 import mlflow
@@ -14,9 +14,6 @@ from sklearn.model_selection import cross_val_score
 from sklearn import metrics
 from sklearn import tree
 import matplotlib.pyplot as plt
-
-CONFIG_PATH = "../configuration/config.yaml"
-TREE_PLOT_PATH = "../data/model_tree_fig.png"
 
 
 def parameter_tuning(
@@ -59,33 +56,6 @@ def parameter_tuning(
     mlflow.log_param(f"best_splitter", best_splitter)
 
     return best_max_depth, best_criterion, best_splitter
-
-
-def model_creation(
-    criterion: str,
-    splitter: str,
-    max_depth: int,
-) -> DecisionTreeClassifier:
-    """
-    Create model using parameters
-
-    Creates a model using the parameters we got from parameter_tuning()
-
-    Args:
-        criterion (str): The function to measure the quality of a split
-        splitter (str): The strategy used to decide how it splits at each node
-        max_depth (int): The maximum depth that the tree can reach
-
-    Returns:
-        DecisionTreeClassifier: the created model with the selected parameters
-    """
-    dtc_model = DecisionTreeClassifier(
-        criterion=criterion,
-        splitter=splitter,
-        max_depth=max_depth,
-    )
-
-    return dtc_model
 
 
 def k_fold_cross_validation(
@@ -156,6 +126,7 @@ def train_model(
 
 def plot_and_log_model(
     dtc_model: DecisionTreeClassifier,
+    tree_plot_path: str
 ) -> None:
     """
     Plot tree figure and save model using sklearn under MLFlow
@@ -171,10 +142,10 @@ def plot_and_log_model(
     fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(4, 4), dpi=300)
     tree.plot_tree(dtc_model)
 
-    fig.savefig(TREE_PLOT_PATH)
+    fig.savefig(tree_plot_path)
     
     # Track the decision tree image
-    mlflow.log_artifact(TREE_PLOT_PATH)
+    mlflow.log_artifact(tree_plot_path)
 
     mlflow.sklearn.log_model(
         sk_model=dtc_model,
@@ -185,7 +156,8 @@ def plot_and_log_model(
 
 @click.command()
 @click.option("--process_run_id")
-def task(process_run_id) -> None:
+@click.option("--config_path")
+def task(process_run_id, config_path) -> None:
     """
     Task function that orchestrates the training step
 
@@ -204,15 +176,15 @@ def task(process_run_id) -> None:
         process_run_id (str): the run id from the process step passed through main step
     """
     with mlflow.start_run() as mlrun:
-        with open(CONFIG_PATH, "r", encoding="UTF-8") as ymlfile:
+        with open(config_path, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
         process_run = mlflow.tracking.MlflowClient().get_run(process_run_id)
 
-        train_path = os.path.join(process_run.info.artifact_uri, "train_data.csv")
+        train_path = Path(process_run.info.artifact_uri, "train_data.csv")
         train_df = pd.read_csv(train_path)
 
-        test_path = os.path.join(process_run.info.artifact_uri, "test_data.csv")
+        test_path = Path(process_run.info.artifact_uri, "test_data.csv")
         test_df = pd.read_csv(test_path)
 
         X_train = train_df[cfg["features"].keys()]
@@ -226,7 +198,7 @@ def task(process_run_id) -> None:
             y_train=y_train,
         )
 
-        dtc_model = model_creation(
+        dtc_model = DecisionTreeClassifier(
             criterion=criterion,
             splitter=splitter,
             max_depth=max_depth,
@@ -249,6 +221,7 @@ def task(process_run_id) -> None:
 
         plot_and_log_model(
             dtc_model=dtc_model,
+            tree_plot_path=cfg["tree_plot_path"]
         )
 
 
