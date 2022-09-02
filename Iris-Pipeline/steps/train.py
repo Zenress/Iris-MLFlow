@@ -156,8 +156,9 @@ def plot_and_log_model(
 
 @click.command()
 @click.option("--process_run_id")
+@click.option("--graphs")
 @click.option("--config_path")
-def task(process_run_id, config_path) -> None:
+def task(process_run_id, graphs, config_path) -> None:
     """
     Task function that orchestrates the training step
 
