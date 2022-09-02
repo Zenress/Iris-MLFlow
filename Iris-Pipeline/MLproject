@@ -9,20 +9,25 @@ entry_points:
     command: python steps/main.py --graphs {graphs}
 
   ingest:
-    command: python steps/ingest.py 
+    parameters:
+      config_path: {type: str}
+    command: python steps/ingest.py --config_path {config_path}
   
   process:
     parameters:
       dataset_run_id: {type: str}
-    command: python steps/process.py --dataset_run_id {dataset_run_id}
+      config_path: {type: str}
+    command: python steps/process.py --dataset_run_id {dataset_run_id} --config_path {config_path}
 
   train:
     parameters:
       process_run_id: {type: str}
-    command: python steps/train.py --process_run_id {process_run_id}
+      config_path: {type: str}
+    command: python steps/train.py --process_run_id {process_run_id} --config_path {config_path}
 
   validate:
     parameters:
       process_run_id: {type: str}
       train_run_id: {type: str}
-    command: python steps/validate.py --process_run_id {process_run_id} --train_run_id {train_run_id}
+      config_path: {type: str}
+    command: python steps/validate.py --process_run_id {process_run_id} --train_run_id {train_run_id} --config_path {config_path}
