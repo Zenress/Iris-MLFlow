@@ -7,11 +7,12 @@ import mlflow
 import yaml
 import requests
 from pathlib import Path
+import click
 
-CONFIG_PATH = "../configuration/config.yaml"
-DATASET_PATH = "../data/"
 
-def load_file_as_dataframe() -> None:
+@click.command()
+@click.option("--config_path")
+def load_file_as_dataframe(config_path) -> None:
     """
     Download the dataset or use existing one
 
@@ -19,12 +20,12 @@ def load_file_as_dataframe() -> None:
      otherwise it just passes the currently existing dataset
     """
     with mlflow.start_run() as mlrun:
-        with open(CONFIG_PATH, "r", encoding="UTF-8") as ymlfile:
+        with open(config_path, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
         csv_url = cfg["csv_url"]
 
-        file_name = Path(DATASET_PATH, cfg["dataset_name"])
+        file_name = Path(cfg["dataset_path"], cfg["dataset_name"])
         
         if not file_name.exists():
             print("File doesn't exist")
