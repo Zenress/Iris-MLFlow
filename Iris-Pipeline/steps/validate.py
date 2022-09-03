@@ -9,6 +9,7 @@ import pandas as pd
 from sklearn import metrics
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import cross_val_score
+import pickle
 
 
 def evaluate(
@@ -16,18 +17,19 @@ def evaluate(
     X_validate: pd.Series,
     y_validate: pd.Series
     ) -> None:
-    """_summary_
-
+    """
+    Evaluate the validation 
+    
     Args:
         model (DecisionTreeClassifier): _description_
-        X_validate (pd.Series): _description_
-        y_validate (pd.Series): _description_
+        X_validate (pd.Series): validation features gathered from validation_data.csv
+        y_validate (pd.Series): validation label gathered from validation_data.csv
     """
     mlflow.log_metric(
-        "test_accuracy", metrics.accuracy_score(y_validate, model.predict(X_validate))
+        "validation_accuracy", metrics.accuracy_score(y_validate, model.predict(X_validate))
     )
     mlflow.log_metric(
-        "test_score", model.score(X_validate, y_validate)
+        "validation_score", model.score(X_validate, y_validate)
     )
     
     scores = cross_val_score(
@@ -62,8 +64,20 @@ def task(process_run_id, train_run_id, config_path):
         validate_path = Path(process_run.info.artifact_uri, "validate_data.csv")
         validate_df = pd.read_csv(validate_path)
         
+        model_path = f"runs:/{train_run_id}/artifacts/models"
+        
+        print(str(model_path))
+        
+        dtc_model = mlflow.sklearn.load_model(str(model_path))
+        
         X_validate = validate_df[cfg["features"].keys()]
         y_validate = validate_df[cfg["label_name"]]
+        
+        evaluate(
+            model=dtc_model,
+            X_validate=X_validate,
+            y_validate=y_validate
+            )
         
         
 if __name__ == "__main__":
