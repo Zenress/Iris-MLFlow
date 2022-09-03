@@ -64,7 +64,7 @@ def task(process_run_id, train_run_id, config_path):
         validate_path = Path(process_run.info.artifact_uri, "validate_data.csv")
         validate_df = pd.read_csv(validate_path)
         
-        model_path = f"runs:/{train_run_id}/artifacts/models"
+        model_path = f"runs:/{train_run_id}/models"
         
         print(str(model_path))
         
