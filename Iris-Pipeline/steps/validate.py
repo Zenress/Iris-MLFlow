@@ -38,9 +38,10 @@ def evaluate(
         y=y_validate,
         )
     
-    mlflow.log_metric(
-        "val_score", scores
-    )
+    for count, (score) in enumerate(scores):
+        mlflow.log_metric(
+            f"val_score{count}", score
+        )
 
 
 @click.command()
@@ -58,13 +59,16 @@ def task(process_run_id, train_run_id, config_path):
         with open(config_path, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
             
+        model_version = train_run_id[:5]    
+            
         process_run = mlflow.tracking.MlflowClient().get_run(process_run_id)
         train_run = mlflow.tracking.MlflowClient().get_run(train_run_id)
         
         validate_path = Path(process_run.info.artifact_uri, "validate_data.csv")
         validate_df = pd.read_csv(validate_path)
         
-        model_path = f"runs:/{train_run_id}/models"
+        model_name = cfg["model_name"] + f"-{model_version}"
+        model_path = f"runs:/{train_run_id}/{model_name}"
         
         print(str(model_path))
         
