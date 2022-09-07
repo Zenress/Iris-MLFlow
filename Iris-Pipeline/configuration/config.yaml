@@ -1,4 +1,6 @@
 model_name: dtc_model
+model_path: models/
+deployment_json_name: deployed_model.json
 dataset_name: irisdata_raw.csv
 dataset_path: ../data/
 tree_plot_path: ../data/model_tree_fig.png
