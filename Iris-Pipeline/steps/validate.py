@@ -70,7 +70,8 @@ def evaluate(
     Evaluate the validation 
     
     Args:
-        model (DecisionTreeClassifier): _description_
+        model (DecisionTreeClassifier): trained decision tree classifier,
+            from the last step
         X_validate (pd.Series): validation features gathered from validation_data.csv
         y_validate (pd.Series): validation label gathered from validation_data.csv
     """
