@@ -9,9 +9,58 @@ import pandas as pd
 from sklearn import metrics
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import cross_val_score
-import pickle
+import json
 
 
+def compare_models(
+    deployed_model: DecisionTreeClassifier,
+    current_model: DecisionTreeClassifier,
+    X_validate: pd.Series,
+    y_validate: pd.Series,
+    json_name: str,
+    model_name: str,
+    ) -> None:
+    """_summary_
+
+    Args:
+        deployed_model (DecisionTreeClassifier): _description_
+        current_model (DecisionTreeClassifier): _description_
+        X_validate (pd.Series): _description_
+        y_validate (pd.Series): _description_
+        json_name (str): _description_
+        model_name (str): _description_
+    """
+    deployed_model_score = metrics.accuracy_score(y_validate, deployed_model.predict(X_validate))
+    current_model_score = metrics.accuracy_score(y_validate, current_model.predict(X_validate))
+    
+    if deployed_model_score < current_model_score:
+        deployed_cross_scores = cross_val_score(
+        estimator=deployed_model,
+        X=X_validate,
+        y=y_validate,
+        )
+        
+        current_cross_scores = cross_val_score(
+        estimator=current_model,
+        X=X_validate,
+        y=y_validate,
+        )
+        
+        improved_scores = []
+        
+        for count, (score) in enumerate(deployed_cross_scores):
+            if score < current_cross_scores[count]:
+                improved_scores.append(current_cross_scores)
+        
+        if improved_scores > deployed_cross_scores:
+            with open(json_name, 'r') as openfile:
+                json_object = json.load(openfile)
+                
+            json_object['name'] = model_name
+            
+            with open("iris-pipeline/models/deployed_model.json", "w") as file:
+                file.write(json_object)
+        
 def evaluate(
     model:DecisionTreeClassifier,
     X_validate: pd.Series,
@@ -83,6 +132,7 @@ def task(process_run_id, train_run_id, config_path):
             y_validate=y_validate
             )
         
+        compare_models()
         
 if __name__ == "__main__":
     task()
