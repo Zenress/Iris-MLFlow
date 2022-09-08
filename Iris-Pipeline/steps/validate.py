@@ -106,11 +106,13 @@ def evaluate(
 @click.option("--train_run_id")
 @click.option("--config_path")
 def task(process_run_id, train_run_id, config_path):
-    """_summary_
+    """
+    validate model performance against deployed model
 
     Args:
         process_run_id (str): run id that the process step generated
         train_run_id (str): run id that the train step generated
+        config_path (str): path to the configuration file
     """
     with mlflow.start_run() as mlrun:
         with open(config_path, "r", encoding="UTF-8") as ymlfile:
