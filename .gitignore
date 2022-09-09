@@ -1,6 +1,6 @@
-mlruns/
-iris-pipeline/models/*
-iris-pipeline/data/*
+mlruns/**
+Iris-Pipeline/models/**
+Iris-Pipeline/data/**
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
