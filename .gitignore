@@ -1,6 +1,10 @@
 mlruns/**
 Iris-Pipeline/models/**
 Iris-Pipeline/data/**
+!irisdata_raw.csv
+.code-workspace
+
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
