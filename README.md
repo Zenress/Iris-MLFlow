@@ -16,7 +16,9 @@ The project is run locally and will therefore use storage on your computer
   - [Project usage](#project-usage)
     - [Running the project](#running-the-project)
       - [Configuration](#configuration)
+      - [MLFlow configuration](#mlflow-configuration)
       - [MLFlow pipeline usage](#mlflow-pipeline-usage)
+      - [MLFlow UI (User Interface)](#mlflow-ui-user-interface)
       - [Predicting](#predicting)
   - [Dataset](#dataset)
   - [Credits](#credits)
@@ -36,6 +38,7 @@ The project is run locally and will therefore use storage on your computer
 - *SKlearn 1.0.2*
 - *Yaml*
 - *Click*
+- *JSON*
 
 ## Setup
 
@@ -44,6 +47,10 @@ The project is run locally and will therefore use storage on your computer
 To run this project you should create a **Conda Environment** (<https://www.anaconda.com/products/distribution>) to run it on. This will help with making sure it can run in it's default configuration
 
 The **Conda Environment** file `Iris-Pipeline/configuration/env.yaml` makes it easy to create the environment to run this project.
+
+Here is an overview of how the environment file looks:
+
+![Overview of conda environment file](docs/conda_environment_overview.png)
 
 To create the environment, you should type the command in console:
 
@@ -67,7 +74,7 @@ conda env remove -n Iris_MLFLOW
 
 Afterwards you have to locate where the environment folder is. By default it is under: `C:\Users\YourUserHere\Anaconda3\envs`
 
-You then delete the folder that matches the name of the Environment files configured name, by default it's name would be: `Iris_MLFLOW`
+You can then delete the folder that matches the name of the Environment files configured name, by default it's name would be: `Iris_MLFLOW`
 
 ## Project usage
 
@@ -89,6 +96,17 @@ features:
   petal width: {min: 0.1, max: 2.5}
 ```
 
+The configuration file is very important for keeping the code clean and avoiding the hardcoding of variables
+
+#### MLFlow configuration
+
+The mlflow configuration is split up in the following steps:
+
+- **Ingest**: Checks if the dataset already exists, if it doesn't then the dataset is downloaded
+- **Process**: Data processing step that does a number of data transformations, namely encoding the label column and splitting the dataset from ingest step into 3 different datasets. Train, test and validate.
+- **Training**: Trains the DecisionTreeClassifier Model and makes sure it is training with the best configuration
+- **Validate**: Validates that the training is done in a way that works well on new and unknown data
+
 #### MLFlow pipeline usage
 
 To use the pipeline you should run the following command:
@@ -97,34 +115,43 @@ To use the pipeline you should run the following command:
 mlflow run iris-pipeline
 ```
 
-This will run the following steps:
+This runs the iris pipeline fully. You will see a lot of information about the progress of the so-called run, things like which step is running now and what parameters was passed through.
 
-- Ingest: Checks if the dataset already exists, if it doesn't then the dataset is downloaded
-- Process: Data processing step that does a number of data transformations along with reading the dataset
-- Training: Trains the DecisionTreeClassifier Model and makes sure it is training with the best configuration
-- Validate: Validates that the training is done in a way that works well on new and unknown data
+Here is an example of the information you will get when running the pipeline:
+
+![console output information when running pipeline](docs/console_output.png)
+
+It is entirely possible to just run the pipeline and walk away while it's doing it's thing. The things you'd want to check are all available by following the next step.
+
+#### MLFlow UI (User Interface)
+
+The mlflow UI is an interface that can be used to check pipeline runs and see what was written down during each run, along with the model that was saved.
+
+A good pipeline has a lot of information to gather from this interface. Things like the accuracy on different datasets (in this case validation and test accuracy and score)
+
+Here is an example of how the interface looks:
+
+![alt text](docs/mlflow_ui.png)
 
 #### Predicting
 
-This program is meant to  Train a model/Retrain a model using the Iris Dataset
+To predict using the deployed model created from this pipeline, you'll have to serve the model.
 
-To predict on the model used, you'll have to serve the model as a prediction service.
-
-Insert model serving command here
+*Insert model serving steps here*
 
 ## Dataset
 
 The dataset used is the Iris Dataset (<https://archive.ics.uci.edu/ml/datasets/Iris>)
 
 - 5 columns, headers added later on
-  - Sepal Length
-  - Sepal Width
-  - Petal Length
-  - Petal Width
-  - Class
-    - Iris Setosa
-    - Iris Versicolor
-    - Iris Virginica
+  - **Sepal Length** (numerical)
+  - **Sepal Width** (numerical)
+  - **Petal Length**  (numerical)
+  - **Petal Width** (numerical)
+  - *Class* (categorical)
+    - **Iris Setosa**
+    - **Iris Versicolor**
+    - **Iris Virginica**
 
 The names we're derived from the documentation under **Attribute information** gathered here: <https://archive.ics.uci.edu/ml/datasets/Iris>
 
@@ -132,7 +159,6 @@ The names we're derived from the documentation under **Attribute information** g
 
 - Credit to **UCI** for making the dataset widely accessible.
 - Credit to **Michele Stawowy** for **Quality Assurance and Guidance**
-- Credit to **Martin Riishøj Mathiasen** for the idea to **KFold crossvalidation**
 
 ## Sources
 
