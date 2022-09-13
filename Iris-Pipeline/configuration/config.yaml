@@ -16,7 +16,10 @@ features:
 
 label_name: class
 
-kfold_nr_splits: 5
+kfold_settings:
+ nr_splits: 5
+ shuffle: True
+ random_state: 123
 
 report_settings:
   title: Iris Data Profile Report
