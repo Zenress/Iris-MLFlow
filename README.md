@@ -19,7 +19,10 @@ The project is run locally and will therefore use storage on your computer
       - [MLFlow configuration](#mlflow-configuration)
       - [MLFlow pipeline usage](#mlflow-pipeline-usage)
       - [MLFlow UI (User Interface)](#mlflow-ui-user-interface)
-      - [Predicting](#predicting)
+      - [Model Serving](#model-serving)
+      - [Model prediction](#model-prediction)
+        - [1: CURL in Console/Terminal](#1-curl-in-consoleterminal)
+        - [2: Postman](#2-postman)
   - [Dataset](#dataset)
   - [Credits](#credits)
   - [Sources](#sources)
@@ -133,11 +136,47 @@ Here is an example of how the interface looks:
 
 ![alt text](docs/mlflow_ui.png)
 
-#### Predicting
+#### Model Serving
 
-To predict using the deployed model created from this pipeline, you'll have to serve the model.
+To start predicting on the deployed model created from this pipeline, you'll have to first serve the model.
 
-*Insert model serving steps here*
+Here is an example of a model serving
+
+```mlflow
+mlflow models serve --model-uri models/dtc_model-a883d --env-manager=local
+```
+
+To serve a specific model you have to change the model name to what suits the model you want to use
+
+```mlflow
+mlflow models serve --model-uri [model path]/[model name] --env-manager=local
+```
+
+This will start a local server where you can query the rest api for predictions
+
+#### Model prediction
+
+Querying the model for predictions can be done in a lot of different ways but there is 2 ways i recommend:
+
+The first option is a simple and not that advanced way, which is very limited but perfect for a test on whether you have the project set up correctly.
+
+The second option is an advanced way of querying that allows for a lot of different tests and requests. The tool is really great for doing all sorts of testing and figuring out what the limitations for the MLFlow REST API can handle
+
+##### 1: CURL in Console/Terminal
+
+Use the curl command and use a json file to predict with.
+
+There is a file (`Iris-MLFlow/predictions.json`) included with the project that holds a prediction where you can change the numbers as it fits you.
+
+The command to use this file for a prediction would be:
+
+```mlflow
+curl http://127.0.0.1:5000/invocations -H "Content-Type: application/json" -d @predictions.json
+```
+
+##### 2: Postman
+
+Text about how to use postman
 
 ## Dataset
 
