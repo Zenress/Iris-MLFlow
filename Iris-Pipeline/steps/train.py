@@ -66,17 +66,19 @@ def train_model(
     test_index: list,
 ) -> None:
     """
-    Train DecisionTreeClassifier Model using 2 split dataframes
-
-    Trains a DecisionTreeClassifier using 2 split dataframes,
-    assigned to 4 pandas series. These 4 series are used for training the model
+    Train model using kfold indices
+    
+    Trains model using kfold indices that was gathered from a stratified kfold
 
     Args:
-        dtc_model (DecisionTreeClassifier): Untrained DTC model
-        X_train (pd.Series): Feature columns for training
-        X_test (pd.Series): Feature columns for testing accuracy
-        y_train (pd.Series): Label column for training against
-        y_test (pd.Series): Label column for testing against
+        dtc_model (DecisionTreeClassifier): model to be trained,
+            made with best parameters possible
+        X (pd.Series): feature columns from dataframe for training
+        y (pd.Series): label column from dataframe for training
+        train_index (list/array): indices gathered,
+            from splitting the indices_kfold variable
+        test_index (list/array): indices gathered,
+            from splitting the indices_kfold variable
     """
     X_train = X.iloc[train_index].values
     X_test = X.iloc[test_index].values
