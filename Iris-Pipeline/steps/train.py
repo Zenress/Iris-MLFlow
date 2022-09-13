@@ -10,10 +10,10 @@ import pandas as pd
 import yaml
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import cross_val_score
 from sklearn import metrics
 from sklearn import tree
 import matplotlib.pyplot as plt
+from sklearn.model_selection import StratifiedKFold
 
 
 def parameter_tuning(
@@ -40,7 +40,7 @@ def parameter_tuning(
     parameters = {
         "criterion": ["gini", "entropy"],
         "splitter": ["best", "random"],
-        "max_depth": [2, 3, 4, 5, 6, 7, 8, 9, 10],
+        "max_depth": [2, 3, 4, 5],
     }
 
     tree = DecisionTreeClassifier()
@@ -58,41 +58,12 @@ def parameter_tuning(
     return best_max_depth, best_criterion, best_splitter
 
 
-def k_fold_cross_validation(
-    dtc_model: DecisionTreeClassifier,
-    X_train: pd.Series,
-    y_train: pd.Series,
-    nr_kfold: int,
-) -> None:
-    """
-    Cross Validate data and model to the a score to figure out the quality
-
-    Cross validate data and model,
-        to get a score that tells us how well the data works
-
-    Args:
-        dtc_model (DecisionTreeClassifier): Untrained DTC Model
-        X_train (pd.Series): Feature columns that are used for training
-        y_train (pd.Series): Label column that are used for training against
-        nr_kfold (int): The nr of kfold splits
-    """
-    kfold_scores = cross_val_score(
-        estimator=dtc_model,
-        X=X_train,
-        y=y_train,
-        cv=nr_kfold,
-    )
-
-    mlflow.log_metric("cross_val_average_accuracy", kfold_scores.mean())
-    mlflow.log_metric("cross_val_std_accuracy", kfold_scores.std())
-
-
 def train_model(
     dtc_model: DecisionTreeClassifier,
-    X_train: pd.Series,
-    X_test: pd.Series,
-    y_train: pd.Series,
-    y_test: pd.Series,
+    X: pd.Series,
+    y: pd.Series,
+    train_index: list,
+    test_index: list,
 ) -> None:
     """
     Train DecisionTreeClassifier Model using 2 split dataframes
@@ -107,15 +78,12 @@ def train_model(
         y_train (pd.Series): Label column for training against
         y_test (pd.Series): Label column for testing against
     """
+    X_train = X.iloc[train_index].values
+    X_test = X.iloc[test_index].values
+    y_train = y.iloc[train_index].values
+    y_test = y.iloc[test_index].values
+
     dtc_model = dtc_model.fit(X_train, y_train)
-    print(
-        (
-            # TODO: Add for loop
-            f"Accuracy for test set:"
-            f" {metrics.accuracy_score(y_test, dtc_model.predict(X_test))} - "
-            f"Double check: {dtc_model.score(X_test,y_test)}"
-        )
-    )
     mlflow.log_metric(
         "test_accuracy", metrics.accuracy_score(y_test, dtc_model.predict(X_test))
     )
@@ -191,22 +159,16 @@ def task(process_run_id, graphs, config_path) -> None:
 
         version_number = mlrun.info.run_id[:5]
 
-        train_path = Path(process_run.info.artifact_uri, "train_data.csv")
-        train_df = pd.read_csv(train_path)
+        df_path = Path(process_run.info.artifact_uri, "train_data.csv")
+        df = pd.read_csv(df_path)
 
-        test_path = Path(process_run.info.artifact_uri, "test_data.csv")
-        test_df = pd.read_csv(test_path)
-
-
-        X_train = train_df[cfg["features"].keys()]
-        X_test = test_df[cfg["features"].keys()]
-        y_train = train_df[cfg["label_name"]]
-        y_test = test_df[cfg["label_name"]]
+        X = df[cfg["features"].keys()]
+        y = df[cfg["label_name"]]
 
         max_depth, criterion, splitter = parameter_tuning(
-            nr_kfold=cfg["kfold_nr_splits"],
-            X_train=X_train,
-            y_train=y_train,
+            nr_kfold=cfg["kfold_settings"]["nr_splits"],
+            X_train=X,
+            y_train=y,
         )
 
         dtc_model = DecisionTreeClassifier(
@@ -215,20 +177,19 @@ def task(process_run_id, graphs, config_path) -> None:
             max_depth=max_depth,
         )
 
-        k_fold_cross_validation(
-            dtc_model=dtc_model,
-            X_train=X_train,
-            y_train=y_train,
-            nr_kfold=cfg["kfold_nr_splits"],
-        )
-
-        train_model(
-            dtc_model=dtc_model,
-            X_train=X_train,
-            X_test=X_test,
-            y_train=y_train,
-            y_test=y_test,
-        )
+        indices_kfold = StratifiedKFold(
+            n_splits=cfg["kfold_settings"]["nr_splits"],
+            shuffle=cfg["kfold_settings"]["shuffle"],
+        )  
+         
+        for train_index, test_index in indices_kfold.split(X, y):
+            train_model(
+                dtc_model=dtc_model,
+                X=X,
+                y=y,
+                train_index=train_index,
+                test_index=test_index
+            )
 
         plot_and_log_model(
             dtc_model=dtc_model,
