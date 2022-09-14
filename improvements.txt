@@ -1,10 +1,9 @@
 TODO:
-- Reread README.md
-- Complete Validate docstring
+- What is REST APIs?
+- How do they work and their protocols?
 
-Figure out:
-- Make a fake model registry 
-- How to figure out if the new model is better (how to compare correctly)?
+First draft September 23rd: MLFlow
+Write as many terms as possible Tuesday 20th
 
 Projects currently going on:
 - Iris MLFLOW Pipeline
