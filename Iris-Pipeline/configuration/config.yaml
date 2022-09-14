@@ -1,10 +1,16 @@
 model_name: dtc_model
 model_path: models/
-deployment_json_name: deployed_model.json
-dataset_name: irisdata_raw.csv
-dataset_path: ../data/
 tree_plot_path: ../data/model_tree_fig.png
 csv_url: https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data
+deployment_json_name: deployed_model.json
+
+dataset_name: irisdata_raw.csv
+dataset_path: ../data/
+train_data_name: train_data.csv
+validate_data_name: validate_data.csv
+
+dataset_settings:
+  header: None
 
 column_names: [sepal length, sepal width, petal length, petal width, class]
 
