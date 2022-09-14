@@ -1,7 +1,6 @@
-mlruns/**
-Iris-Pipeline/models/**
-Iris-Pipeline/data/**
-!irisdata_raw.csv
+mlruns/*
+Iris-Pipeline/models/*
+Iris-Pipeline/data/*
 .code-workspace
 
 .vscode/
