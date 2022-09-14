@@ -12,6 +12,11 @@ validate_data_name: validate_data.csv
 dataset_settings:
   header: null
 
+splitting_settings:
+  validate_size: 0.3
+  train_size: 0.7
+  shuffle: True
+
 column_names: [sepal length, sepal width, petal length, petal width, class]
 
 features: 
