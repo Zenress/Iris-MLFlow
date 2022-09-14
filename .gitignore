@@ -1,6 +1,8 @@
 mlruns/*
 Iris-Pipeline/models/*
 Iris-Pipeline/data/*
+!deployed_model.json
+!irisdata_sample.csv
 .code-workspace
 
 .vscode/
