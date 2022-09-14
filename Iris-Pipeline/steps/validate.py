@@ -11,7 +11,6 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import cross_val_score
 import json
 
-JSON_PATH = "../models/"
 
 def compare_models(
     deployed_model: DecisionTreeClassifier,
@@ -56,7 +55,6 @@ def compare_models(
             
         deploy_model = {
             "name": model_name,
-            "deployed": True,
         }
         
         json_object = json.dumps(deploy_model, indent=4)
@@ -64,8 +62,8 @@ def compare_models(
         with open(json_path, "w") as file:
             file.write(json_object)
     else:
-        print("model is not better than current deployed")
-
+        print("Model is not better than current deployed")
+        
 
 def evaluate(
     model:DecisionTreeClassifier,
@@ -103,6 +101,18 @@ def evaluate(
         )
 
 
+def save_model(
+    dtc_model: DecisionTreeClassifier,
+    model_name: str,
+    models_path: str
+    ):        
+    mlflow.sklearn.save_model(
+        sk_model=dtc_model,
+        path=models_path,
+        serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_PICKLE,
+    )
+
+
 @click.command()
 @click.option("--process_run_id")
 @click.option("--train_run_id")
@@ -126,7 +136,7 @@ def task(process_run_id, train_run_id, config_path):
         with open(config_path, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
             
-        json_path = Path(JSON_PATH, cfg["deployment_json_name"])
+        json_path = Path("../",cfg["model_path"], cfg["deployment_json_name"])
         with open(json_path, 'r') as openfile:
             json_object = json.load(openfile)
         
@@ -135,15 +145,13 @@ def task(process_run_id, train_run_id, config_path):
          
         process_run = mlflow.tracking.MlflowClient().get_run(process_run_id)
         
-        validate_path = Path(process_run.info.artifact_uri, "validate_data.csv")
+        validate_path = Path(process_run.info.artifact_uri, cfg["validate_data_name"])
         validate_df = pd.read_csv(validate_path)
         
-        
         model_path = f"runs:/{train_run_id}/{model_name}"
-        deployed_path = Path("../models/",json_object['name'])
+        deployed_path = Path("../",cfg["model_path"],json_object['name'])
         
         dtc_model = mlflow.sklearn.load_model(str(model_path))
-        
         
         X_validate = validate_df[cfg["features"].keys()]
         y_validate = validate_df[cfg["label_name"]]
@@ -170,13 +178,19 @@ def task(process_run_id, train_run_id, config_path):
                 
             deploy_model = {
                 "name": model_name,
-                "deployed": True,
             }
             
             json_object = json.dumps(deploy_model, indent=4)
             
             with open(json_path, "w") as file:
                 file.write(json_object)
+                
+        with open(json_path, 'r') as openfile:
+            json_object = json.load(openfile)
+            
+        if json_object["name"] == model_name:
+            model_path = Path("../", cfg["model_path"], model_name)
+            save_model(dtc_model=dtc_model, model_name=model_name, models_path=model_path)
         
 if __name__ == "__main__":
     task()
