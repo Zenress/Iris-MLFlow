@@ -94,10 +94,9 @@ def train_model(
     )
 
 
-def plot_and_log_model(
+def plot_tree(
     dtc_model: DecisionTreeClassifier,
     tree_plot_path: str,
-    model_name: str,
 ) -> None:
     """
     Plot tree figure and save model using sklearn under MLFlow
@@ -115,20 +114,7 @@ def plot_and_log_model(
 
     fig.savefig(tree_plot_path)
     
-    # Track the decision tree image
-    mlflow.log_artifact(tree_plot_path)
-
-    mlflow.sklearn.log_model(
-        sk_model=dtc_model,
-        artifact_path=model_name,
-        serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_PICKLE,
-    )
-    
-    mlflow.sklearn.save_model(
-        sk_model=dtc_model,
-        path=f"../models/{model_name}",
-        serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_PICKLE,
-    )
+    return tree_plot_path
 
 
 @click.command()
@@ -161,7 +147,7 @@ def task(process_run_id, graphs, config_path) -> None:
 
         version_number = mlrun.info.run_id[:5]
 
-        df_path = Path(process_run.info.artifact_uri, "train_data.csv")
+        df_path = Path(process_run.info.artifact_uri, cfg["train_data_name"])
         df = pd.read_csv(df_path)
 
         X = df[cfg["features"].keys()]
@@ -193,10 +179,17 @@ def task(process_run_id, graphs, config_path) -> None:
                 test_index=test_index
             )
 
-        plot_and_log_model(
+        tree_plot_path = plot_tree(
             dtc_model=dtc_model,
             tree_plot_path=cfg["tree_plot_path"],
-            model_name=cfg["model_name"]+f"-{version_number}",
+        )
+        
+        mlflow.log_artifact(tree_plot_path)
+
+        mlflow.sklearn.log_model(
+            sk_model=dtc_model,
+            artifact_path=cfg["model_name"]+f"-{version_number}",
+            serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_PICKLE,
         )
 
 
