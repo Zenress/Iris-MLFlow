@@ -59,34 +59,33 @@ def task(dataset_run_id, config_path):
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
         
         dataset_run = mlflow.tracking.MlflowClient().get_run(dataset_run_id)   
-        dataset_path = Path(dataset_run.info.artifact_uri, "irisdata_raw.csv")
+        dataset_path = Path(dataset_run.info.artifact_uri, cfg["dataset_name"])
         
         dataset_df = pd.read_csv(
             filepath_or_buffer=dataset_path,
-            sep=",",
-            header=None,
-            names=cfg["column_names"]
+            header=cfg["dataset_settings"]["header"],
+            names=cfg["column_names"],
             )
         
         encoded_df = label_encoding_method(
             dataset_df=dataset_df,
-            label_name=cfg["label_name"]
+            label_name=cfg["label_name"],
             )
         
         train_df, val_df = train_test_split(
             encoded_df,
-            test_size=0.3,
-            train_size=0.7,
-            shuffle=True
+            test_size=cfg["splitting_settings"]["validate_size"],
+            train_size=cfg["splitting_settings"]["train_size"],
+            shuffle=cfg["splitting_settings"]["shuffle"],
             )
         
         print("Uploading train dataset: %s" % train_df.head(2))
-        train_path = Path(cfg["dataset_path"], "train_data.csv")
+        train_path = Path(cfg["dataset_path"], cfg["train_data_name"])
         train_df.to_csv(train_path, index=False)
         mlflow.log_artifact(train_path)
         
         print("Uploading train dataset: %s" % val_df.head(2))
-        validate_path = Path(cfg["dataset_path"], "validate_data.csv")
+        validate_path = Path(cfg["dataset_path"], cfg["validate_data_name"])
         val_df.to_csv(validate_path, index=False)
         mlflow.log_artifact(validate_path)
 
