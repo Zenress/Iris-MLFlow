@@ -39,7 +39,7 @@ def load_file_as_dataframe(config_path) -> None:
 
         mlflow.log_artifact(file_name)
 
-        print(f"Uploading dataframe: {file_name}") #TODO: Use f-strings & on another line
+        print(f"Uploading dataframe: {file_name}")
 
 
 if __name__ == "__main__":
