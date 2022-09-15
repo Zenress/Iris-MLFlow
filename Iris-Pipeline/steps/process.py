@@ -79,12 +79,12 @@ def task(dataset_run_id, config_path):
             shuffle=cfg["splitting_settings"]["shuffle"],
             )
         
-        print("Uploading train dataset: %s" % train_df.head(2))
+        print("Uploading train dataset: %s" % train_df.head(2)) #TODO: Use f-strings & on another line
         train_path = Path(cfg["dataset_path"], cfg["train_data_name"])
         train_df.to_csv(train_path, index=False)
         mlflow.log_artifact(train_path)
         
-        print("Uploading train dataset: %s" % val_df.head(2))
+        print("Uploading validation dataset: %s" % val_df.head(2)) #TODO: Use f-strings & on another line
         validate_path = Path(cfg["dataset_path"], cfg["validate_data_name"])
         val_df.to_csv(validate_path, index=False)
         mlflow.log_artifact(validate_path)
