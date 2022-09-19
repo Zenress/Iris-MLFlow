@@ -30,7 +30,12 @@ def load_file_as_dataframe(config_path) -> None:
         if not file_name.exists():
             print("File doesn't exist")
             print("Downloading Dataset \n--")
-            response_object = requests.get(url=csv_url, allow_redirects=True) #TODO: lacks error control, check online
+            try:
+                response_object = requests.get(url=csv_url, allow_redirects=True)
+            except requests.exceptions.RequestException as e: 
+                print(e)
+            
+            
             with open(file=file_name, mode="wb") as file:
                 file.write(response_object.content)
         else:
@@ -39,7 +44,8 @@ def load_file_as_dataframe(config_path) -> None:
 
         mlflow.log_artifact(file_name)
 
-        print(f"Uploading dataframe: {file_name}")
+        print("Uploading dataframe:")
+        print(file_name)
 
 
 if __name__ == "__main__":
