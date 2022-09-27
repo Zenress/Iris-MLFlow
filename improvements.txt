@@ -1,0 +1,17 @@
+TODO:
+- What is REST APIs?
+- How do they work and their protocols?
+
+First draft September 23rd: MLFlow
+Write as many terms as possible Tuesday 20th
+
+Projects currently going on:
+- Iris MLFLOW Pipeline
+- Tutorial on how to setup MLFlow projects on Windows PC
+- 1 Article
+- Terms vocab
+
+Exercises needed for next time:
+- Why would you need 2 Conda Environments?
+- How do i plan to deal with the Article?
+- How much time would things take?
