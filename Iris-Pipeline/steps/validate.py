@@ -50,6 +50,7 @@ def compare_models(
     print(current_model_acc)
     
     if deployed_model_acc < current_model_acc:
+        print("Model is better than currently deployed model")
         with open(json_path, 'r') as openfile:
             json_object = json.load(openfile)
             
@@ -63,6 +64,8 @@ def compare_models(
             file.write(json_object)
     else:
         print("Model is not better than current deployed")
+    
+    return deployed_model_acc, current_model_acc
         
 
 def evaluate(
@@ -95,23 +98,10 @@ def evaluate(
         y=y_validate,
         )
     
-    for count, (score) in enumerate(scores):
+    for score in scores:
         mlflow.log_metric(
             f"val_score", score
         )
-
-
-def save_model(
-    dtc_model: DecisionTreeClassifier,
-    model_name: str,
-    models_path: str
-    ):        
-    mlflow.sklearn.save_model(
-        sk_model=dtc_model,
-        path=models_path,
-        serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_PICKLE,
-    )
-
 
 @click.command()
 @click.option("--process_run_id")
@@ -135,7 +125,9 @@ def task(process_run_id, train_run_id, config_path):
     with mlflow.start_run() as mlrun:
         with open(config_path, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-            
+        
+        mlflow.set_tag("mlflow.runName","Model validation step")
+        
         json_path = Path("../",cfg["model_path"], cfg["deployment_json_name"])
         with open(json_path, 'r') as openfile:
             json_object = json.load(openfile)
@@ -190,7 +182,11 @@ def task(process_run_id, train_run_id, config_path):
             
         if json_object["name"] == model_name:
             model_path = Path("../", cfg["model_path"], model_name)
-            save_model(dtc_model=dtc_model, model_name=model_name, models_path=model_path)
+            mlflow.sklearn.save_model(
+                sk_model=dtc_model,
+                path=model_path,
+                serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_PICKLE
+                )
         
 if __name__ == "__main__":
     task()
