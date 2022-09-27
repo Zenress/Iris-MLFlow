@@ -143,6 +143,8 @@ def task(process_run_id, graphs, config_path) -> None:
         with open(config_path, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
+        mlflow.set_tag("mlflow.runName","Model training step")
+
         process_run = mlflow.tracking.MlflowClient().get_run(process_run_id)
 
         version_number = mlrun.info.run_id[:5]
