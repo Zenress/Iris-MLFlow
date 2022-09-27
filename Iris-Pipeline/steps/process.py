@@ -21,8 +21,8 @@ def label_encoding_method(
     into more usable numerical labels
     
     Args:
-        dataset_df (pandas.DataFrame): The dataset that was read through pandas,
-            and assigned as a dataframe.
+        dataset_df (pandas.DataFrame): The dataset containing the data,
+            that we will use to make a copy and then encode that copy
         label_name (str): The label column name derived from the configuration file
         
     Returns:
@@ -30,9 +30,10 @@ def label_encoding_method(
             with an encoded label column
     """
     label_encoder = LabelEncoder
-    dataset_df[label_name] = label_encoder.fit_transform(label_encoder,dataset_df[label_name])
+    encoded_df = dataset_df
+    encoded_df[label_name] = label_encoder.fit_transform(label_encoder,encoded_df[label_name])
     
-    return dataset_df
+    return encoded_df
 
 
 @click.command()
@@ -58,6 +59,8 @@ def task(dataset_run_id, config_path):
         with open(config_path, "r", encoding="UTF-8") as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
         
+        mlflow.set_tag("mlflow.runName","Data processing step")
+        
         dataset_run = mlflow.tracking.MlflowClient().get_run(dataset_run_id)   
         dataset_path = Path(dataset_run.info.artifact_uri, cfg["dataset_name"])
         
@@ -66,6 +69,8 @@ def task(dataset_run_id, config_path):
             header=cfg["dataset_settings"]["header"],
             names=cfg["column_names"],
             )
+        
+        print(dataset_df.head(2))
         
         encoded_df = label_encoding_method(
             dataset_df=dataset_df,
@@ -79,12 +84,14 @@ def task(dataset_run_id, config_path):
             shuffle=cfg["splitting_settings"]["shuffle"],
             )
         
-        print("Uploading train dataset: %s" % train_df.head(2)) #TODO: Use f-strings & on another line
+        print("Uploading train dataset:")
+        print(train_df.head(2))
         train_path = Path(cfg["dataset_path"], cfg["train_data_name"])
         train_df.to_csv(train_path, index=False)
         mlflow.log_artifact(train_path)
         
-        print("Uploading validation dataset: %s" % val_df.head(2)) #TODO: Use f-strings & on another line
+        print("Uploading validation dataset:")
+        print(val_df.head(2))
         validate_path = Path(cfg["dataset_path"], cfg["validate_data_name"])
         val_df.to_csv(validate_path, index=False)
         mlflow.log_artifact(validate_path)
