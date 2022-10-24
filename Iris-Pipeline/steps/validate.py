@@ -65,11 +65,10 @@ def compare_models(
     else:
         print("Model is not better than current deployed")
     
-    return deployed_model_acc, current_model_acc
         
 
 def evaluate(
-    model:DecisionTreeClassifier,
+    current_model:DecisionTreeClassifier,
     X_validate: pd.Series,
     y_validate: pd.Series
     ) -> None:
@@ -86,21 +85,18 @@ def evaluate(
         y_validate (pd.Series): validation label gathered from validation_data.csv
     """
     mlflow.log_metric(
-        "validation_accuracy", metrics.accuracy_score(y_validate, model.predict(X_validate))
-    )
-    mlflow.log_metric(
-        "validation_score", model.score(X_validate, y_validate)
+        "validation_accuracy", metrics.accuracy_score(y_validate, current_model.predict(X_validate))
     )
     
     scores = cross_val_score(
-        estimator=model,
+        estimator=current_model,
         X=X_validate,
         y=y_validate,
         )
     
     for score in scores:
         mlflow.log_metric(
-            f"val_score", score
+            f"validation_score", score
         )
 
 @click.command()
@@ -132,7 +128,8 @@ def task(process_run_id, train_run_id, config_path):
         with open(json_path, 'r') as openfile:
             json_object = json.load(openfile)
         
-        model_version = train_run_id[:5]    
+        train_run = mlflow.get_run(train_run_id)
+        model_version = train_run.data.params[cfg["time_param_name"]]
         model_name = cfg["model_name"] + f"-{model_version}"
          
         process_run = mlflow.tracking.MlflowClient().get_run(process_run_id)
@@ -149,7 +146,7 @@ def task(process_run_id, train_run_id, config_path):
         y_validate = validate_df[cfg["label_name"]]
         
         evaluate(
-            model=dtc_model,
+            current_model=dtc_model,
             X_validate=X_validate,
             y_validate=y_validate
             )

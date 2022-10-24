@@ -14,6 +14,7 @@ from sklearn import metrics
 from sklearn import tree
 import matplotlib.pyplot as plt
 from sklearn.model_selection import StratifiedKFold
+import datetime
 
 
 def parameter_tuning(
@@ -147,7 +148,10 @@ def task(process_run_id, graphs, config_path) -> None:
 
         process_run = mlflow.tracking.MlflowClient().get_run(process_run_id)
 
-        version_number = mlrun.info.run_id[:5]
+        time = datetime.now()
+        time_number = time.strftime("%H:%M:%S")
+        mlflow.log_param(cfg["time_param_name"], time_number)
+
 
         df_path = Path(process_run.info.artifact_uri, cfg["train_data_name"])
         df = pd.read_csv(df_path)
@@ -190,7 +194,7 @@ def task(process_run_id, graphs, config_path) -> None:
 
         mlflow.sklearn.log_model(
             sk_model=dtc_model,
-            artifact_path=cfg["model_name"]+f"-{version_number}",
+            artifact_path=cfg["model_name"]+f"-{time_number}",
             serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_PICKLE,
         )
 
