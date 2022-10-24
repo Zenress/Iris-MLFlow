@@ -9,6 +9,7 @@ splitting_settings:
   validate_size: 0.3
   train_size: 0.7
   shuffle: True
+time_param_name: model_training_time
 # -----------------------------------
 # Kfold related
 kfold_settings:
