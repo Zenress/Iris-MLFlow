@@ -6,13 +6,14 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 import mlflow
 import click
+import pyspark.pandas as ps
 import pandas as pd
 import yaml
 
 def label_encoding_method(
-    dataset_df: pd.DataFrame,
+    dataset_df: ps.DataFrame,
     label_name: str
-    ) -> pd.DataFrame:
+    ) -> ps.DataFrame:
     """
     Encode the label
     
@@ -69,6 +70,8 @@ def task(dataset_run_id, config_path):
             header=cfg["dataset_settings"]["header"],
             names=cfg["column_names"],
             )
+        
+        dataset_df = ps.from_pandas(dataset_df)
         
         print(dataset_df.head(2))
         
