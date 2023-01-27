@@ -42,6 +42,7 @@ The project is run locally and will therefore use storage on your computer
 - *Yaml*
 - *Click*
 - *JSON*
+- *PySpark*
 
 ## Setup
 
